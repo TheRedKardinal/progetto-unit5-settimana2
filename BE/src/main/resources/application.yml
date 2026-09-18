@@ -33,10 +33,16 @@ spring:
     cache: false
 
 openrouter:
-  api:
-    key: ${OPENROUTER_API_KEY}
-    base-url: https://openrouter.ai/api/v1
+  base-url: https://openrouter.ai/api/v1
+  api-key: ${OPENROUTER_API_KEY}
+  model: ${OPENROUTER_MODEL:openai/gpt-4o-mini}
 
 jwt:
   secret: ${JWT_SECRET:changeme-dev-only-please-override-in-env}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+chat:
+  messaggi-default-limit: ${CHAT_MESSAGGI_DEFAULT_LIMIT:50}
+
+ai:
+  contesto-messaggi-limit: ${AI_CONTESTO_MESSAGGI_LIMIT:20}

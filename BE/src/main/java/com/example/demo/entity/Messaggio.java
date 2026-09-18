@@ -43,6 +43,10 @@ public class Messaggio {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean letto = false;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;
