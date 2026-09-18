@@ -11,6 +11,9 @@ interface SidebarProps {
   onLogout: () => void;
   onInviaStatistiche: () => void;
   statisticheInCorso: boolean;
+  caricamentoChat: boolean;
+  erroreCaricamentoChat: string | null;
+  onRiprovaCaricamentoChat: () => void;
 }
 
 export default function Sidebar({
@@ -22,6 +25,9 @@ export default function Sidebar({
   onLogout,
   onInviaStatistiche,
   statisticheInCorso,
+  caricamentoChat,
+  erroreCaricamentoChat,
+  onRiprovaCaricamentoChat,
 }: SidebarProps) {
   return (
     <div className="bc-glass bc-sidebar">
@@ -64,13 +70,30 @@ export default function Sidebar({
       </div>
 
       <div className="bc-chat-list bc-scrollbar">
-        {chats.length === 0 && (
+        {caricamentoChat && (
+          <div className="text-center text-muted mt-4">
+            <Spinner animation="border" size="sm" />
+          </div>
+        )}
+
+        {!caricamentoChat && erroreCaricamentoChat && (
+          <div className="text-center px-3 mt-4">
+            <p className="text-danger mb-2" style={{ fontSize: '0.85rem' }}>
+              Impossibile caricare le chat: {erroreCaricamentoChat}
+            </p>
+            <Button variant="light" size="sm" className="rounded-pill" onClick={onRiprovaCaricamentoChat}>
+              Riprova
+            </Button>
+          </div>
+        )}
+
+        {!caricamentoChat && !erroreCaricamentoChat && chats.length === 0 && (
           <div className="text-center text-muted mt-4 px-3" style={{ fontSize: '0.85rem' }}>
             Nessuna chat ancora. Avviane una con il pulsante "+ Chat".
           </div>
         )}
 
-        {chats.map((chat) => (
+        {!caricamentoChat && !erroreCaricamentoChat && chats.map((chat) => (
           <div
             key={chat.id}
             className={`bc-chat-item ${chat.id === selectedChatId ? 'active' : ''}`}

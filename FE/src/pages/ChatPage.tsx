@@ -25,6 +25,8 @@ export default function ChatPage() {
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [statisticheInCorso, setStatisticheInCorso] = useState(false);
   const [notifica, setNotifica] = useState<Notifica | null>(null);
+  const [erroreCaricamentoChat, setErroreCaricamentoChat] = useState<string | null>(null);
+  const [caricamentoChat, setCaricamentoChat] = useState(true);
 
   const selectedChatIdRef = useRef<string | null>(null);
 
@@ -32,11 +34,27 @@ export default function ChatPage() {
     selectedChatIdRef.current = selectedChat?.id ?? null;
   }, [selectedChat?.id]);
 
+  // usata dal pulsante "Riprova": qui setState sincrono va bene, non è dentro un effect
+  function ricaricaChat() {
+    if (!utente) return;
+    setCaricamentoChat(true);
+    setErroreCaricamentoChat(null);
+    listaChat()
+      .then(setChats)
+      .catch((err) =>
+        setErroreCaricamentoChat(err instanceof ApiError ? err.message : 'Impossibile contattare il server'),
+      )
+      .finally(() => setCaricamentoChat(false));
+  }
+
   useEffect(() => {
     if (!utente) return;
     listaChat()
       .then(setChats)
-      .catch((err) => setNotifica({ tipo: 'danger', testo: err instanceof ApiError ? err.message : 'Errore nel caricamento delle chat' }));
+      .catch((err) =>
+        setErroreCaricamentoChat(err instanceof ApiError ? err.message : 'Impossibile contattare il server'),
+      )
+      .finally(() => setCaricamentoChat(false));
   }, [utente]);
 
   function gestisciMessaggioRicevuto(messaggio: Messaggio) {
@@ -163,6 +181,9 @@ export default function ChatPage() {
         onLogout={logout}
         onInviaStatistiche={handleInviaStatistiche}
         statisticheInCorso={statisticheInCorso}
+        caricamentoChat={caricamentoChat}
+        erroreCaricamentoChat={erroreCaricamentoChat}
+        onRiprovaCaricamentoChat={ricaricaChat}
       />
 
       <ChatWindow
