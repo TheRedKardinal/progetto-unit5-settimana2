@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,10 @@ public interface MessaggioRepository extends JpaRepository<Messaggio, UUID> {
     long countMessaggiRicevuti(@Param("utenteId") UUID utenteId);
 
     List<Messaggio> findByChat_IdAndMittente_IdNotAndLettoFalse(UUID chatId, UUID mittenteId);
+
+    long countByChat_IdAndMittente_IdNotAndLettoFalse(UUID chatId, UUID mittenteId);
+
+    Optional<Messaggio> findFirstByChat_IdOrderByCreatedAtDesc(UUID chatId);
 
     @Modifying
     @Query("""

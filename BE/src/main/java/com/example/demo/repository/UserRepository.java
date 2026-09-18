@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
+
+    List<User> findByIdNotAndUsernameContainingIgnoreCaseOrderByUsernameAsc(UUID excludeId, String query);
 }

@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -9,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dto.chat.ChatResponse;
+import com.example.demo.dto.chat.ChatSummaryResponse;
 import com.example.demo.dto.chat.MessaggioResponse;
 import com.example.demo.entity.Chat;
+import com.example.demo.entity.Messaggio;
 import com.example.demo.entity.User;
 import com.example.demo.exception.ForbiddenOperationException;
 import com.example.demo.exception.ResourceNotFoundException;
@@ -73,5 +77,27 @@ public class ChatService {
                 .toList();
 
         return new ChatResponse(chat.getId(), altroUtente.getId(), altroUtente.getUsername(), chat.getCreatedAt(), messaggi);
+    }
+
+    public List<ChatSummaryResponse> listaChatUtente(UUID currentUserId) {
+        return chatRepository.findByPartecipante(currentUserId).stream()
+                .map(chat -> costruisciSommario(chat, currentUserId))
+                .sorted(Comparator.comparing(ChatSummaryResponse::ultimoMessaggioData, Comparator.nullsLast(Comparator.reverseOrder())))
+                .toList();
+    }
+
+    private ChatSummaryResponse costruisciSommario(Chat chat, UUID currentUserId) {
+        User altroUtente = chat.getUser1().getId().equals(currentUserId) ? chat.getUser2() : chat.getUser1();
+
+        Optional<Messaggio> ultimoMessaggio = messaggioRepository.findFirstByChat_IdOrderByCreatedAtDesc(chat.getId());
+        long nonLetti = messaggioRepository.countByChat_IdAndMittente_IdNotAndLettoFalse(chat.getId(), currentUserId);
+
+        return new ChatSummaryResponse(
+                chat.getId(),
+                altroUtente.getId(),
+                altroUtente.getUsername(),
+                ultimoMessaggio.map(Messaggio::getTesto).orElse(null),
+                ultimoMessaggio.map(Messaggio::getCreatedAt).orElse(chat.getCreatedAt()),
+                nonLetti);
     }
 }
